@@ -4,6 +4,8 @@ import (
 	"errors"
 
 	"golang-user-auth/internal/entity"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 type UserRepository interface {
@@ -28,9 +30,14 @@ func (u *userUsecase) RegisterUser(email string, password string) error {
 		return errors.New("ユーザーは既に存在します")
 	}
 
+  hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return errors.New("パスワードのハッシュ化に失敗しました")
+	}
+
 	user := &entity.User{
 		Email:    email,
-		Password: password,
+		Password: string(hashedPassword),
 	}
 
 	return u.userRepo.Create(user)
